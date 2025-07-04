@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Login System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-container:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-toggle {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .toggle-btn.active {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .form-content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: #4f46e5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #4f46e5;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #10b981;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .admin-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-toggle">
+            <div class="toggle-btn active" id="login-toggle">Login</div>
+            <div class="toggle-btn" id="register-toggle">Register</div>
+        </div>
+        
+        <div class="form-content">
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter your password">
+                    <span class="password-toggle" id="login-password-toggle">👁️</span>
+                </div>
+                
+                <div class="form-group">
+                    <select id="login-role" class="w-full p-3 border-2 border-gray-200 rounded-lg">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <div class="error-message" id="login-error"></div>
+                
+                <button type="submit" class="btn">Login</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="register-form" class="hidden">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" required placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required placeholder="Create a password">
+                    <span class="password-toggle" id="register-password-toggle">👁️</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" required placeholder="Confirm your password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-secret-key">Admin Secret Key (Leave blank for user account)</label>
+                    <input type="password" id="register-secret-key" placeholder="Enter admin secret key if applicable">
+                </div>
+                
+                <div class="error-message" id="register-error"></div>
+                <div class="success-message" id="register-success"></div>
+                
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Dashboard Modal -->
+    <div id="dashboard-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4" id="dashboard-title">Welcome, <span id="dashboard-name"></span> <span id="dashboard-role" class="admin-badge hidden">Admin</span></h2>
+            <div class="mb-6">
+                <p class="text-gray-600"><span class="font-semibold">Email:</span> <span id="dashboard-email"></span></p>
+                <p class="text-gray-600 mt-2"><span class="font-semibold">Account Type:</span> <span id="dashboard-type"></span></p>
+            </div>
+            <button id="logout-btn" class="btn bg-red-500 hover:bg-red-600">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginToggle = document.getElementById('login-toggle');
+        const registerToggle = document.getElementById('register-toggle');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loginError = document.getElementById('login-error');
+        const registerError = document.getElementById('register-error');
+        const registerSuccess = document.getElementById('register-success');
+        const dashboardModal = document.getElementById('dashboard-modal');
+        const logoutBtn = document.getElementById('logout-btn');
+        const dashboardName = document.getElementById('dashboard-name');
+        const dashboardEmail = document.getElementById('dashboard-email');
+        const dashboardType = document.getElementById('dashboard-type');
+        const dashboardRole = document.getElementById('dashboard-role');
+        const dashboardTitle = document.getElementById('dashboard-title');
+        
+        // Password toggle elements
+        const loginPasswordToggle = document.getElementById('login-password-toggle');
+        const registerPasswordToggle = document.getElementById('register-password-toggle');
+        const loginPassword = document.getElementById('login-password');
+        const registerPassword = document.getElementById('register-password');
+        
+        // Admin secret key (in a real app, this would be server-side)
+        const ADMIN_SECRET_KEY = "admin123";
+        
+        // Initialize localStorage if empty
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+            
+            // Add a default admin account for demo purposes
+            const defaultAdmin = {
+                id: Date.now(),
+                name: "Admin User",
+                email: "admin@example.com",
+                password: "admin123",
+                role: "admin"
+            };
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            users.push(defaultAdmin);
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+        
+        // Toggle between login and register forms
+        loginToggle.addEventListener('click', () => {
+            loginToggle.classList.add('active');
+            registerToggle.classList.remove('active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            loginError.style.display = 'none';
+        });
+        
+        registerToggle.addEventListener('click', () => {
+            registerToggle.classList.add('active');
+            loginToggle.classList.remove('active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            registerError.style.display = 'none';
+            registerSuccess.style.display = 'none';
+        });
+        
+        // Toggle password visibility
+        loginPasswordToggle.addEventListener('click', () => {
+            if (loginPassword.type === 'password') {
+                loginPassword.type = 'text';
+                loginPasswordToggle.textContent = '🙈';
+            } else {
+                loginPassword.type = 'password';
+                loginPasswordToggle.textContent = '👁️';
+            }
+        });
+        
+        registerPasswordToggle.addEventListener('click', () => {
+            if (registerPassword.type === 'password') {
+                registerPassword.type = 'text';
+                registerPasswordToggle.textContent = '🙈';
+            } else {
+                registerPassword.type = 'password';
+                registerPasswordToggle.textContent = '👁️';
+            }
+        });
+        
+        // Login form submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const role = document.getElementById('login-role').value;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const user = users.find(u => u.email === email && u.password === password && u.role === role);
+            
+            if (user) {
+                // Successful login
+                loginError.style.display = 'none';
+                
+                // Show dashboard
+                dashboardName.textContent = user.name;
+                dashboardEmail.textContent = user.email;
+                dashboardType.textContent = user.role === 'admin' ? 'Administrator' : 'Standard User';
+                
+                if (user.role === 'admin') {
+                    dashboardRole.classList.remove('hidden');
+                } else {
+                    dashboardRole.classList.add('hidden');
+                }
+                
+                dashboardModal.classList.remove('hidden');
+            } else {
+                // Failed login
+                loginError.textContent = 'Invalid email, password, or role. Please try again.';
+                loginError.style.display = 'block';
+            }
+        });
+        
+        // Register form submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const secretKey = document.getElementById('register-secret-key').value;
+            
+            // Validate inputs
+            if (password !== confirmPassword) {
+                registerError.textContent = 'Passwords do not match!';
+                registerError.style.display = 'block';
+                registerSuccess.style.display = 'none';
+                return;
+            }
+            
+            if (password.length < 6) {
+                registerError.textContent = 'Password must be at least 6 characters!';
+                registerError.style.display = 'block';
+                registerSuccess.style.display = 'none';
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            
+            // Check if email already exists
+            if (users.some(u => u.email === email)) {
+                registerError.textContent = 'Email already registered!';
+                registerError.style.display = 'block';
+                registerSuccess.style.display = 'none';
+                return;
+            }
+            
+            // Determine role based on secret key
+            let role = 'user';
+            if (secretKey) {
+                if (secretKey === ADMIN_SECRET_KEY) {
+                    role = 'admin';
+                } else {
+                    registerError.textContent = 'Invalid admin secret key!';
+                    registerError.style.display = 'block';
+                    registerSuccess.style.display = 'none';
+                    return;
+                }
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password,
+                role
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Show success message
+            registerError.style.display = 'none';
+            registerSuccess.textContent = 'Account created successfully! You can now login.';
+            registerSuccess.style.display = 'block';
+            
+            // Clear form
+            registerForm.reset();
+            
+            // Auto-switch to login form after 2 seconds
+            setTimeout(() => {
+                loginToggle.click();
+            }, 2000);
+        });
+        
+        // Logout button
+        logoutBtn.addEventListener('click', () => {
+            dashboardModal.classList.add('hidden');
+            loginForm.reset();
+        });
+    </script>
+</body>
+</html>
